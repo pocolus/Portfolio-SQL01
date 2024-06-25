@@ -14,3 +14,5 @@ triggers, DCL y TCL.
 proveedores, catalogo-proveedor, tipo de pago y detalle-venta, toda esta coleccion de datos nos permite poder analizar y a su vez desarrollar estrategias que nos permitan tener mejores resultados en la empresa.
 
 **•	DESARROLLO-EJECUCION:**
+
+![DIAGRAMA-ENTIDAD-RELACION](https://github.com/pocolus/Portfolio-SQL01/blob/main/Imagen1.png)
