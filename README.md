@@ -1,5 +1,8 @@
 # Portfolio-SQL01
 
+**NOTA:**
+Basicamente este proyecto lo iniciamos desde cero, ya que la idea es implementar varias funciones de SQL como views, funciones, procedimientos, triggers, DCL y TCL. Para asi poder ver todo lo que nos puede ofrecer SQL, en cualquier proyecto de datos que tengamos
+
 **•	TITULO: TIENDA DE ELECTRONICOS Y HOGAR.**
 
 **•	DESCRIPCION DEL PROYECTO:** En la siguiente base de datos, encontramos la información de una tienda comercial que vende diferentes tipos de productos, especialmente de tecnología y hogar. Esta tienda está ubicada en varias ciudades a nivel mundial. Acá podemos evidenciar sus ventas del mes de marzo de 2024, en cada una de sus sucursales.
@@ -16,3 +19,9 @@ proveedores, catalogo-proveedor, tipo de pago y detalle-venta, toda esta colecci
 **•	DESARROLLO-EJECUCION:**
 
 ![DIAGRAMA-ENTIDAD-RELACION](https://github.com/pocolus/Portfolio-SQL01/blob/main/Imagen1.png)
+
+```sql
+-- 1. CREAMOS LA BASE DE DATOS
+DROP schema if exists Proyecto_Tienda_Electronicos;
+CREATE schema if not exists Proyecto_Tienda_Electronicos;
+USE Proyecto_Tienda_Electronicos;
