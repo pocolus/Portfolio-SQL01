@@ -1,0 +1,15 @@
+                                                      INSTALACION PARA LA BASE DE DATOS
+
+NOTA: Para poder instalar la base de datos "Proyecto Tienda Electronica", ingresamos a la carpeta "Entrega final" y en ella seleccionamos la carpeta "Script-Sql" y posteriormente seleccionar en orden ascendente los siguientes archivos:
+
+1.SCHEMA: Abrir y ejecutar este archivo para la creación  del schema.
+2.TABLAS: Abrir y ejecutar estos archivos para crear las tablas de nuestro proyecto.
+3.INSERCION: Abrir y ejecutar los archivos para insertar los datos a las tablas Proveedor, Localización, Tipo-Pago, Catalogo-Proveedor y Sucursal.
+Para las tablas: Cliente, Producto, Vendedores, Detalle-Venta y Ventas, se hizo la inserción de datos con importación de archivos, estos archivos Csv se encuentran contenidos en una carpeta llamada "Archivos-Csv" dentro de la carpeta "Script-Sql" y esta a su vez esta contenida en la carpeta "Entrega final".
+4.VIEWS: Abrir y ejecutar este archivo para generar las vistas, las cuales se encuentran en un schema nuevo llamado Entrega2, esto lo hacemos por buenas practicas.
+5.FUNCIONES:  Abrir y ejecutar estos archivos para la creación de las funciones.
+6.PROCEDIMIENTOS: Abrir y ejecutar este archivo para la generación de los procedimientos.
+7.TRIGGERS: Abrir y ejecutar este archivo para crear los triggers y las tablas de seguimiento.
+8.DCL: Abrir y ejecutar este archivo para la generación de los usuarios, como también otorgar los permisos solicitados para cada uno de ellos.
+9.TCL: Abrir y ejecutar estos archivos para iniciar las transacciones correspondientes.
+10.BKP: Abrir y ejecutar este archivo para crear el backup, de solo las tablas a nivel de datos.
