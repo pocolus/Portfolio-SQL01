@@ -1,7 +1,7 @@
 # Portfolio-SQL01
 
 **NOTA:**
-Basicamente este proyecto lo iniciamos desde cero, ya que la idea es implementar varias funciones de SQL como views, funciones, procedimientos, triggers, DCL y TCL. Para asi poder ver todo lo que nos puede ofrecer SQL, en cualquier proyecto de datos que tengamos
+Basicamente este proyecto lo iniciamos desde cero, ya que la idea es implementar varias funciones de SQL como views, funciones, procedimientos, triggers, DCL y TCL. Para asi poder ver todo lo que nos puede ofrecer SQL, en cualquier proyecto de datos que tengamos.
 
 **•	TITULO: TIENDA DE ELECTRONICOS Y HOGAR.**
 
@@ -501,4 +501,149 @@ DELIMITER ;
 -- INVOCAR FUNCION
 SELECT FN_PROMEDIO_VENTAS_CONTINENTE ('NORTE AMERICA');
 ```
+**6. SCRIPT DE LA CREACION DE PROCEDIMIENTOS**
+```sql
+-- 6.1 PROCEDIMIENTO: Aca podemos reemplazar la columna que queramos de la tabla vendedores, y ordenarla con desc o asc. 
+DELIMITER $$
+CREATE PROCEDURE SP_VENDEDORES_ORDERBY (
+    IN P_columna VARCHAR(50),
+    IN P_DESC_ASC enum ('DESC', 'ASC'))
+BEGIN
+    SET @VENDE = CONCAT('SELECT ID_VENDEDOR, NOMBRE, APELLIDO, EDAD, TELEFONO, Fecha_Inicio FROM vendedores ORDER BY ', P_columna, ' ', P_DESC_ASC, ' LIMIT 1'  ) ;
+    PREPARE statement FROM @VENDE ;
+    EXECUTE statement ;
+    DEALLOCATE PREPARE statement ;
+END $$
+DELIMITER ;
+-- INVOCAR PROCEDIMIENTO
+CALL SP_VENDEDORES_ORDERBY ('EDAD', 'asc');
+
+-- PRUEBA DE ESCRITORIO
+INSERT INTO LOCALIZACION 
+(ID_LOCALIZACION, PAIS, CIUDAD, CONTINENTE)
+values
+(13, 'China', 'Bejing', 'Asia');
+select * from localizacion;
+-- 6.2 PROCEDIMIENTO CON INSERT: Aca basicamente insertamos datos a la tabla localizacion
+DELIMITER $$
+CREATE PROCEDURE SP_INSERCION_LOCALIZACION( IN P_ID int ,
+                                                      IN P_PAIS varchar (30) ,                                             
+                                                      in P_CIUDAD VARCHAR(30) ,
+                                                      in P_CONTINENTE varchar (30) , 
+                                                      OUT P_ID2 INT ,
+                                                      out P_PAIS2 varchar (30) ,                                             
+                                                      out P_CIUDAD2 VARCHAR(30) ,
+                                                      out P_CONTINENTE2 varchar (30) ) 
+BEGIN
+INSERT INTO LOCALIZACION 
+(ID_LOCALIZACION, PAIS, CIUDAD, CONTINENTE)
+values
+(P_ID, P_PAIS, P_CIUDAD, P_CONTINENTE) ;
+
+END $$
+DELIMITER ; 
+-- Invocar procedimeinto
+call SP_INSERCION_LOCALIZACION (14, 'Italia', 'Roma', 'Europa', @P_ID2, @P_PAIS2, @P_CIUDAD2, @P_CONTINENTE2 );
+select @P_ID2 as ID, @P_PAIS2 AS PAIS, @P_CIUDAD2 AS CIUDAD, @P_CONTINENTE2 AS CONTINENTE;
+SELECT * FROM localizacion;
+
+-- PRUEBA DE ESCRITORIO: TRAER LA MARCA, NOMBRE DEL PROVEEDOR Y LA CANTIDAD DE PRODUCTOS, DE LA MARCA'SAMSUNG' Y QUE LA CANTIDAD DE PRODUCTOS SEA MAYOR A 1O
+-- traer solo el producto con mayor cantidad de stock
+select marca, nombre, cantidad
+from catalogo_proveedor
+inner join proveedor
+on catalogo_proveedor.ID_PROVEEDOR = proveedor.ID_PROVEEDOR
+where marca = 'Samsung' and cantidad > 10
+order by CANTIDAD desc
+limit 1;
+-- 6.3 PROCEDIMIENTO
+DELIMITER $$
+CREATE PROCEDURE SP_MARCA_STOCK( IN P_MARCA VARCHAR(50) ,
+                                                      IN P_CANTIDAD INT ,    -- entrada                                              
+                                                      OUT P_MARCA2 VARCHAR(30) ,
+                                                      OUT P_NOMBRE_PROVEEDOR varchar (30) , -- salida
+                                                      OUT P_CANTIDAD2 INT ) 
+BEGIN
+
+select marca, nombre, cantidad
+INTO
+P_MARCA2, P_NOMBRE_PROVEEDOR, P_CANTIDAD2
+from catalogo_proveedor
+inner join proveedor
+on catalogo_proveedor.ID_PROVEEDOR = proveedor.ID_PROVEEDOR
+where marca =  P_MARCA and cantidad > P_CANTIDAD
+order by CANTIDAD desc
+limit 1;
+
+END $$
+DELIMITER ; 
+-- INVOCACION DEL PROCEDIMIENTO
+CALL SP_MARCA_STOCK ('samsung', 39, @P_MARCA2, @P_NOMBRE_PROVEEDOR, @P_CANTIDAD2 );
+SELECT @P_MARCA2 AS MARCA, @P_NOMBRE_PROVEEDOR AS NOMBRE_PROVEEDOR, @P_CANTIDAD2 AS CANTIDAD;
+```
+**7. SCRIPT DE LA CREACION DE TRIGGERS**
+```sql
+-- 7.1 TRIGGER PARA LA TABLA CLIENTE CON LA ACCION BEFORE, CON UNA OPERACION DE INSERT
+-- CREAMOS LA TABLA DE SEGUIMIENTO O BITACORA
+CREATE TABLE Clientes_Seguimiento (
+ID_CLIENTE int PRIMARY KEY,
+DOCUMENTO int,
+NOMBRE varchar (50),
+APELLIDO varchar (50),
+EDAD INT,
+GENERO enum ('M','F'),
+TIPO_CLIENTE enum ('Normal', 'Miembro'),
+TELEFONO VARCHAR (20),
+CORREO VARCHAR (50),
+FECHA_TRIGGER datetime,
+USUARIO VARCHAR (50)
+);
+-- DESARROLLAMOS EL TRIGGER PARA LA TABLA CLIENTES
+CREATE TRIGGER tr_insert_before_clientes
+before insert on clientes
+for each row
+insert into Clientes_Seguimiento (ID_CLIENTE, DOCUMENTO, NOMBRE, APELLIDO, EDAD, GENERO, TIPO_CLIENTE, TELEFONO, CORREO, FECHA_TRIGGER, USUARIO)
+values
+(new.ID_CLIENTE, new.DOCUMENTO, new.NOMBRE, new.APELLIDO, new.EDAD, new.GENERO, new.TIPO_CLIENTE, new.TELEFONO, new.CORREO,  now(), user() );
+
+-- hacemos el insert
+insert into clientes
+(DOCUMENTO, NOMBRE, APELLIDO, EDAD, GENERO, TIPO_CLIENTE, TELEFONO, CORREO) 
+VALUES
+(03044050, 'Maxii', 'blue', 88, 'M', 'Normal', '3002410998', 'maxio@hotmail.com');
+
+select * from clientes_Seguimiento;
+select * from clientes;
+
+-- 7.2 TRIGGER PARA LA TABLA VENDEDOR CON LA ACCION AFTER, CON UNA OPERACION DE UPDATE
+-- CREAMOS LA TABLA DE SEGUIMIENTO O BITACORA
+CREATE TABLE vendedores_Seguimiento (
+ID_VENDEDOR int primary key,
+NOMBRE varchar (50),
+APELLIDO varchar (50),
+EDAD int,
+TELEFONO varchar (20),
+FECHA_TRIGGER datetime,
+USUARIO VARCHAR (50)
+);
+-- DESARROLLAMOS EL TRIGGER PARA LA TABLA VENDEDORES
+CREATE TRIGGER tr_update_after_vendedores
+after update on vendedores
+for each row 
+insert into vendedores_Seguimiento (ID_VENDEDOR, NOMBRE, APELLIDO, EDAD, TELEFONO, FECHA_TRIGGER, USUARIO)
+values
+(new.ID_VENDEDOR, new.NOMBRE, new.APELLIDO, new.EDAD, new.TELEFONO, now(), user());
+
+-- hacemos el update
+update vendedores
+set telefono = '4002340987'
+where ID_VENDEDOR = 1;
+
+select * from vendedores_Seguimiento;
+select * from vendedores;
+```
+
+
+
+
 
