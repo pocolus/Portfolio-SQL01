@@ -25,6 +25,7 @@ proveedores, catalogo-proveedor, tipo de pago y detalle-venta, toda esta colecci
 DROP schema if exists Proyecto_Tienda_Electronicos;
 CREATE schema if not exists Proyecto_Tienda_Electronicos;
 USE Proyecto_Tienda_Electronicos;
+
 **2. CREACION DE TABLAS**
 ```sql
 -- 2.1 CREAMOS LA TABLA CLIENTE
