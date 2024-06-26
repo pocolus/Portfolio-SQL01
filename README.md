@@ -223,3 +223,282 @@ values
 ('Tata', '11', '3213456578', 'Yesid Alvarez'),
 ('Feri', '12', '3176543421', 'Pedro Arias');
 ```
+**4. SCRIPT DE LA CREACION DE VISTAS**
+```sql
+-- 4.1 PRIMERO DESARROLLAMOS UN SCHEMA NUEVO DONDE VAN LAS VIEWS CREADAS, ESTO LO HACEMOS POR BUENAS PRACTICAS. 
+DROP schema IF exists Entrega2;
+create schema if not exists Entrega2;
+
+-- 4.2 EN ESTA VIEW, QUEREMOS VER CUAL ES LA SUCURSAL CON MAYOR CANTIDAD DE VENTAS
+CREATE OR replace view
+Entrega2.VW_VIEW1_CANTIDAD_VENTAS AS
+(
+SELECT sucursal.ID_SUCURSAL, sucursal.NOMBRE, sucursal.TELEFONO,
+count(ventas.ID_SUCURSAL) AS Numero_Ventas
+FROM sucursal
+inner join ventas
+on sucursal.ID_SUCURSAL = ventas.ID_SUCURSAL
+group by sucursal.ID_SUCURSAL, sucursal.NOMBRE, sucursal.TELEFONO
+order by Numero_Ventas desc
+limit 1
+);
+select * from entrega2.vw_view1_cantidad_ventas;
+
+-- 4.3 EN ESTA VIEW, QUEREMOS VER LA SUMA TOTAL DE VENTAS AGRUPADAS POR LOS DIAS DE LA SEMANA
+CREATE OR replace view
+Entrega2.VW_VIEW2_SUMA_VENTAS AS
+(
+SELECT dayname(FECHA_VENTAS) AS Dia,
+sum(total) as Suma_Total
+from ventas
+group by Dia
+order by Suma_Total desc
+);
+
+-- 4.4  EN ESTA VIEW, QUEREMOS HACER UN CONTEO, POR LA AGRUPACION DE TIPO DE PAGO
+CREATE OR replace view
+Entrega2.VW_VIEW3_AGRUPACION_PAGO AS
+(
+select TIPO_PAGO,
+count(ventas.ID_TIPO_PAGO) as Numero_Ventas
+from tipo_pago
+inner join ventas 
+on tipo_pago.ID_TIPO_PAGO = ventas.ID_TIPO_PAGO
+group by TIPO_PAGO
+);
+
+-- 4.5  EN ESTA VIEW, QUEREMOS VER CUAL VENDEDOR HIZO LA VENTA DE MAYOR VALOR
+CREATE OR replace view
+Entrega2.VW_VIEW4_VENDEDOR_MAYOR AS
+(
+select vendedores.ID_VENDEDOR, NOMBRE, APELLIDO
+FROM vendedores
+inner join ventas
+on vendedores.ID_VENDEDOR = ventas.ID_VENDEDOR
+where total = (select max(total) from ventas)
+);
+
+-- 4.6 EN ESTA VIEW, QUEREMOS HACER UN CONTEO DE LOS CLIENTES POR GENERO MAYORES DE 35 
+CREATE OR replace view
+Entrega2.VW_VIEW5_CONTEO_CLIENTES_35 AS
+(
+SELECT genero,
+count(*) Cantidad_Clientes
+from clientes
+where edad > 35
+group by genero
+);
+
+-- 4.7 EN ESTA VIEW, QUEREMOS VER LA EDAD PROMEDIO DE LOS CLIENTES
+CREATE OR replace view
+Entrega2.VW_VIEW6_EDAD_PROMEDIO AS
+(
+SELECT  round(avg(edad)) as Edad_Promedio_Clientes
+from clientes
+);
+
+-- 4.8 EN ESTA VIEW, QUEREMOS VER EL DIA CON LA MAYOR CANTIDAD DE ITEMS VENDIDOS
+CREATE OR replace view
+Entrega2.VW_VIEW7_DIA_MAYOR AS
+(
+SELECT FECHA_VENTAS, SUM(dv.CANTIDAD) AS Total_Productos_Vendidos
+FROM ventas v
+JOIN detalle_venta dv ON v.Id_Ventas = dv.Id_Ventas
+GROUP BY FECHA_VENTAS
+ORDER BY Total_Productos_Vendidos DESC
+LIMIT 1
+);
+
+-- 4.9 EN ESTA VIEW, QUEREMOS VER TODOS LOS PRODUCTOS QUE TIENEN UN PRECIO MAYOR O IGUAL AL PRODUCTO MAS BARATO DE LA MARCA SAMSUNG
+CREATE OR replace view
+Entrega2.VW_VIEW8_SAMSUNG_BARATO AS
+(
+select ID_PRODUCTO, nombre, precio
+from producto
+where precio >= (select min(precio) from producto
+where nombre like '%samsung%')
+);
+
+-- 4.10 EN ESTA VIEW, QUEREMOS VER EL PRODUCTO CON  MAS UNIDADES VENDIDAS 
+CREATE OR replace view
+Entrega2.VW_VIEW9_PRODUCTO_MAS_VENDIDO AS
+(
+select producto.ID_PRODUCTO, nombre, precio,
+count(detalle_venta.ID_PRODUCTO) as Numero_Ventas,
+sum(CANTIDAD) as Cantidad_Unidades_Vendidas
+from producto
+inner join detalle_venta
+on producto.ID_PRODUCTO = detalle_venta.ID_PRODUCTO
+group by producto.ID_PRODUCTO, nombre, precio
+order by Cantidad_Unidades_Vendidas desc
+limit 2
+);
+
+-- 4.11 EN ESTA VIEW, QUEREMOS VER EL PRODUCTO CON  MENOS UNIDADES VENDIDAS 
+CREATE OR replace view
+Entrega2.VW_VIEW10_PRODUCTO_MENOS_VENDIDO AS
+(
+select producto.ID_PRODUCTO, nombre, precio,
+count(detalle_venta.ID_PRODUCTO) as Numero_Ventas,
+sum(CANTIDAD) as Cantidad_Unidades_Vendidas
+from producto
+inner join detalle_venta
+on producto.ID_PRODUCTO = detalle_venta.ID_PRODUCTO
+group by producto.ID_PRODUCTO, nombre, precio
+order by Cantidad_Unidades_Vendidas 
+limit 1
+);
+```
+**5. SCRIPT DE LA CREACION DE FUNCIONES**
+```sql
+-- PRUEBA DE ESCRITORIO
+SELECT Producto
+FROM (
+SELECT producto.NOMBRE as Producto,
+sum(detalle_venta.CANTIDAD) as cantidad
+FROM producto
+INNER JOIN catalogo_proveedor
+ON producto.ID_PRODUCTO = catalogo_proveedor.ID_PRODUCTO
+INNER JOIN proveedor
+ON catalogo_proveedor.ID_PROVEEDOR = proveedor.ID_PROVEEDOR
+INNER JOIN detalle_venta
+ON catalogo_proveedor.ID_PRODUCTO = detalle_venta.ID_PRODUCTO
+where proveedor.NOMBRE = 'Ubi'
+group by producto.NOMBRE, proveedor.NOMBRE
+order by cantidad desc
+limit 1
+) as Subconsulta;
+
+-- 5.1 FUNCION PARA SABER EL PRODUCTO CON MAS CANTIDADES VENDIDAS DE CUALQUIER PROVEEDOR
+DELIMITER $$ 
+CREATE FUNCTION FN_PRODUCTO_MAS_VENDIDO_PROVEEDOR (P_PROVEEDOR varchar (100))
+                           
+RETURNS VARCHAR(100)
+DETERMINISTIC 
+BEGIN 
+declare V_RESULTADO varchar (100) ;
+
+SELECT Producto
+FROM (
+SELECT producto.NOMBRE as Producto,
+sum(detalle_venta.CANTIDAD) as cantidad
+FROM producto
+INNER JOIN catalogo_proveedor
+ON producto.ID_PRODUCTO = catalogo_proveedor.ID_PRODUCTO
+INNER JOIN proveedor
+ON catalogo_proveedor.ID_PROVEEDOR = proveedor.ID_PROVEEDOR
+INNER JOIN detalle_venta
+ON catalogo_proveedor.ID_PRODUCTO = detalle_venta.ID_PRODUCTO
+where proveedor.NOMBRE = P_PROVEEDOR
+group by producto.NOMBRE, proveedor.NOMBRE
+order by cantidad desc
+limit 1
+) as Subconsulta 
+into V_RESULTADO;
+
+RETURN V_RESULTADO;
+END $$
+DELIMITER ;
+-- Invocar a la funcion
+select FN_PRODUCTO_MAS_VENDIDO_PROVEEDOR ('Sanders');
+
+-- PRUEBA DE ESCRITORIO
+SELECT  sum(TOTAL) AS Total_Ventas
+FROM localizacion
+INNER JOIN sucursal
+ON localizacion.ID_LOCALIZACION = sucursal.ID_LOCALIZACION
+INNER JOIN VENTAS
+ON sucursal.ID_SUCURSAL = ventas.ID_SUCURSAL
+WHERE PAIS = 'USA'
+
+-- 5.2 FUNCION PARA SABER EL TOTAL DE VENTAS DE CADA PAIS QUE ELIJAMOS. 
+DELIMITER $$ 
+CREATE FUNCTION FN_PAIS_VENTAS_TOTALES(P_PAIS VARCHAR(100))
+				
+RETURNS VARCHAR(100)
+DETERMINISTIC 
+BEGIN 
+DECLARE V_TOTAL VARCHAR(250) ;
+
+SELECT  sum(TOTAL) AS Total_Ventas
+FROM localizacion
+INNER JOIN sucursal
+ON localizacion.ID_LOCALIZACION = sucursal.ID_LOCALIZACION
+INNER JOIN VENTAS
+ON sucursal.ID_SUCURSAL = ventas.ID_SUCURSAL
+WHERE PAIS = P_PAIS
+INTO V_TOTAL;
+RETURN V_TOTAL;
+END$$ 
+DELIMITER ;
+
+-- Invocar a la funcion
+select FN_PAIS_VENTAS_TOTALES ('USA');
+
+-- PRUEBA DE ESCRITORIO
+SELECT  
+precio * sum(cantidad) as Ventas_Por_Producto
+From detalle_venta
+INNER JOIN producto
+ON detalle_venta.ID_PRODUCTO = producto.ID_PRODUCTO
+WHERE producto.NOMBRE = 'portatil asus' 
+group by precio
+having precio * sum(cantidad) > 1380;
+
+-- 5.3 FUNCION PARA CONOCER CUANTO DINERO GENERO CADA PRODUCTO EN LAS VENTAS
+DELIMITER $$ 
+CREATE FUNCTION FN_VENTAS_POR_PRODUCTO(P_PRODUCTO VARCHAR(100), 
+				                       P_VALOR int ) 
+RETURNS int
+DETERMINISTIC 
+BEGIN 
+DECLARE V_VALOR int ;
+ 
+SELECT  
+precio * sum(cantidad) as Ventas_Por_Producto
+From detalle_venta
+INNER JOIN producto
+ON detalle_venta.ID_PRODUCTO = producto.ID_PRODUCTO
+WHERE producto.NOMBRE =  P_PRODUCTO
+group by precio
+having precio * sum(cantidad) > P_VALOR
+INTO V_VALOR;
+RETURN V_VALOR;
+END$$ 
+DELIMITER ;
+-- INVOCAR FUNCION
+SELECT FN_VENTAS_POR_PRODUCTO ('portatil asus', 1380);
+
+-- PRUEBA DE ESCRITORIO
+SELECT  round(avg(total)) AS Pomedio_valor_Ventas
+FROM localizacion
+INNER JOIN sucursal
+ON localizacion.ID_LOCALIZACION = sucursal.ID_LOCALIZACION
+INNER JOIN VENTAS
+ON sucursal.ID_SUCURSAL = ventas.ID_SUCURSAL
+WHERE CONTINENTE = 'sur america';
+
+-- 5.4 FUNCION PARA CONOCER EL PROMEDIO DEL VALOR DE LAS VENTAS TOTALES POR CONTINENTE
+ DELIMITER $$ 
+CREATE FUNCTION FN_PROMEDIO_VENTAS_CONTINENTE(P_CONTINENTE VARCHAR(50))
+				
+RETURNS int
+DETERMINISTIC 
+BEGIN 
+DECLARE V_PROMEDIO int ;
+
+SELECT  round(avg(total)) AS Pomedio_valor_Ventas
+FROM localizacion
+INNER JOIN sucursal
+ON localizacion.ID_LOCALIZACION = sucursal.ID_LOCALIZACION
+INNER JOIN VENTAS
+ON sucursal.ID_SUCURSAL = ventas.ID_SUCURSAL
+WHERE CONTINENTE = P_CONTINENTE
+INTO V_PROMEDIO;
+RETURN V_PROMEDIO;
+END$$ 
+DELIMITER ;
+-- INVOCAR FUNCION
+SELECT FN_PROMEDIO_VENTAS_CONTINENTE ('NORTE AMERICA');
+```
+
