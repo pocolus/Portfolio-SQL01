@@ -642,6 +642,63 @@ where ID_VENDEDOR = 1;
 select * from vendedores_Seguimiento;
 select * from vendedores;
 ```
+**8. IMPLEMENTACION DE SENTENCIAS**
+```sql
+CREACION DE DOS USUARIOS 
+8.1 ESTE USUARIO DEBE TENER PERMISOS DE SOLO LECTURA SOBRE TODAS LAS TABLAS
+*/
+use mysql;
+select * from user;
+CREATE user IF not exists AlexanderG@localhost identified by 'data'; -- creamos el usuario AlexanderG en nuestro localhost
+grant select on proyecto_tienda_electronicos.* to AlexanderG@localhost; -- A este usuario le otorgamos el permiso de solo lectura para el schema proyecto_tienda_electronicos en todas las tablas.
+show grants FOR AlexanderG@localhost;
+
+-- 8.2 ESTE USUARIO DEBE TENER PERMISOS DE SOLO LECTURA, INSERCION Y UPDATE SOBRE TODAS LAS TABLAS
+CREATE user IF not exists DATA_ANALITYCS@localhost identified by '12345'; -- creamos el usuario DATA_ANALITYCS en nuestro localhost
+grant select, insert, update on proyecto_tienda_electronicos.* to DATA_ANALITYCS@localhost; -- A este usuario le otorgamos el permiso de lectura, insercion y update para el schema proyecto_tienda_electronicos en todas las tablas.
+show grants FOR DATA_ANALITYCS@localhost;
+```
+**9. SENTENCIAS DEL SUBLENGUAJE TCL**
+```sql
+9.1 En la tabla vendedores, se elimino el registro con id 15, y se inicio con una una transacción.  
+Deja en una línea siguiente, comentado la sentencia Rollback, y en una línea posterior, la sentencia Commit. Si eliminas registros importantes, deja comentadas las sentencias para re-insertarlos.
+
+SELECT @@autocommit; -- vemos si esta activada o no el tcl
+SET @@autocommit = 0; -- apagada las transacciones
+SET  @@FOREIGN_KEY_CHECKS = 0; -- desactivo llaves foraneas, en caso que necesite borrar o manipular la tabla madre
+SET SQL_SAFE_UPDATES = 0;
+
+select * from vendedores; -- Para este caso seleccionamos la tabla vendedores
+START TRANSACTION ; -- damos inicio a la transaccion
+delete from vendedores 
+where ID_VENDEDOR = 15; -- volver a insertar: 15 - Carla - Lopez - 51 - 3131036513 - 7 - 2022-07-25
+-- rollback -- Deshace la transaccion
+-- commit -- confirma la transaccion
+
+/* 9.2 
+En la tabla proveedor, se inserto ocho nuevos registros iniciando también una transacción. 
+Agrega un savepoint a posteriori de la inserción del registro #4 y otro savepoint a posteriori del registro #8
+Agrega en una línea comentada la sentencia de eliminación del savepoint de los primeros 4 registros insertados.
+*/
+SELECT @@autocommit; -- vemos si esta activada o no el tcl
+SET @@autocommit = 0; -- apagada las transacciones
+SET  @@FOREIGN_KEY_CHECKS = 0; -- desactivo llaves foraneas, en caso que necesite borrar o manipular la tabla madre
+SET SQL_SAFE_UPDATES = 0;
+
+select * from proveedor; -- Para este caso seleccionamos la tabla vendedores
+START TRANSACTION ; -- damos inicio a la transaccion
+insert into proveedor (ID_PROVEEDOR,NOMBRE,TELEFONO,UBICACION) values (6, 'Exit', '2323345', 'India');
+insert into proveedor (ID_PROVEEDOR,NOMBRE,TELEFONO,UBICACION) values (7, 'Exito', '12653233400', 'India');
+insert into proveedor (ID_PROVEEDOR,NOMBRE,TELEFONO,UBICACION) values (8, 'Tare', '5552334532', 'India');
+insert into proveedor (ID_PROVEEDOR,NOMBRE,TELEFONO,UBICACION) values (9, 'Fuller', '54672334', 'Usa');
+savepoint sp1; -- Primer sp
+insert into proveedor (ID_PROVEEDOR,NOMBRE,TELEFONO,UBICACION) values (10, 'Insat', '0009845', 'China');
+insert into proveedor (ID_PROVEEDOR,NOMBRE,TELEFONO,UBICACION) values (11, 'Ail', '232334532', 'Bangladesh');
+insert into proveedor (ID_PROVEEDOR,NOMBRE,TELEFONO,UBICACION) values (12, 'Tere', '1113345', 'India');
+insert into proveedor (ID_PROVEEDOR,NOMBRE,TELEFONO,UBICACION) values (13, 'Qred', '999334509', 'Taiwan');
+savepoint sp2; -- Segundo sp
+-- release savepoint sp1; -- Eliminacion del savepoint sp1
+```
 
 
 
