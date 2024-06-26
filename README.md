@@ -20,8 +20,8 @@ proveedores, catalogo-proveedor, tipo de pago y detalle-venta, toda esta colecci
 
 ![DIAGRAMA-ENTIDAD-RELACION](https://github.com/pocolus/Portfolio-SQL01/blob/main/Imagen1.png)
 
+1. CREAMOS LA BASE DE DATOS
 ```sql
--- 1. CREAMOS LA BASE DE DATOS
 DROP schema if exists Proyecto_Tienda_Electronicos;
 CREATE schema if not exists Proyecto_Tienda_Electronicos;
 USE Proyecto_Tienda_Electronicos;
