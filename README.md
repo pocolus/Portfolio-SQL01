@@ -149,4 +149,77 @@ constraint FK_VENTAS_CLIENTES foreign key (ID_CLIENTE) references CLIENTES (ID_C
 constraint FK_VENTAS_VENDEDOR foreign key (ID_VENDEDOR) references VENDEDORES (ID_VENDEDOR),
 constraint Fk_VENTAS_TPAGO foreign key (ID_TIPO_PAGO) references TIPO_PAGO (ID_TIPO_PAGO)
 );
+```
+**3. INSERCION DE ARCHIVOS**
+```sql
+/*En la inserción de datos, decidir hacer el script de SQL con cinco tablas, las cuales son: Proveedor, Localización, Tipo-Pago, Catalogo-Proveedor y Sucursal.
+Para las tablas: Cliente, Producto, Vendedores, Detalle-Venta y Ventas, hice la inserción con importación de archivos.*/
+ 
+-- 3.1 INSERCION DE DATOS MEDIANTE SCRIPT SQL PARA LA TABLA PROVEEDOR
+INSERT INTO proveedor
+(NOMBRE, TELEFONO, UBICACION)
+values
+('Electronic Nine', '3155764103', 'Usa'),
+('M&G', '3122698493', 'China'),
+('Sanders', '3171192610', 'Usa'),
+('Ubi', '3118171474', 'China'),
+('Sams', '3209028008', 'Usa');
 
+-- 3.2 INSERCION DE DATOS MEDIANTE SCRIPT SQL PARA LA TABLA LOCALIZACION
+insert into localizacion
+(Pais, Ciudad, Continente)
+values
+('Usa',	'New York',	'Norte America'),
+('Usa',	'Los Angeles', 'Norte America'),
+('Usa',	'San Francisco', 'Norte America'),
+('Usa',	'Miami', 'Norte America'),
+('Usa',	'Chicago',	'Norte America'),
+('Argentina', 'Buenos Aires', 'Sur America'),
+('Colombia', 'Bogota',	'Sur America'),
+('Francia',	'Paris', 'Europa'),
+('Alemania', 'Berlin', 'Europa'),
+('Mexico',	'Monterrey', 'America Central'),
+('Australia', 'Sydney',	'Australia'),
+('Japon', 'Tokio',	'Asia');
+
+-- 3.3 INSERCION DE DATOS MEDIANTE SCRIPT SQL PARA LA TABLA TIPO DE PAGO
+INSERT INTO tipo_pago
+(Tipo_Pago)
+values
+('Efectivo'),('Tarjeta de Credito'),
+('NetBanking'), ('Prestamo');
+
+-- 3.4 INSERCION DE DATOS MEDIANTE SCRIPT SQL PARA LA TABLA CATALOGO_PROVEEDOR
+insert into catalogo_proveedor
+(MARCA, CANTIDAD, ID_PRODUCTO, ID_PROVEEDOR)
+values
+('Asus', '50', '1', '4'),
+('Apple', '50', '2', '2'),
+('Sony', '50', '3', '3'),
+('Xbox', '50', '4', '3'),
+('Nintendo', '50', '5', '3'),
+('Samsung', '35', '6', '1'),
+('Samsung', '40', '7', '1'),
+('Apple', '15', '8', '2'),
+('Samsung', '23', '9', '1'),
+('Xiaomi', '12', '10', '4'),
+('Rimax', '8', '11', '5'),
+('Rimax', '8', '12', '5');
+
+-- 3.5 INSERCION DE DATOS MEDIANTE SCRIPT SQL PARA LA TABLA SUCURSAL
+insert into sucursal
+(NOMBRE, ID_LOCALIZACION, TELEFONO, ENCARGADO)
+values
+('Hamilton', '1', '3277032299', 'Danzel Mender'),
+('Spencer', '2', '3423903895', 'Borgir Ham'),
+('Truli', '3', '3161933489', 'Gabriel Diaz'),
+('Guandia', '4', '3274069139', 'Jackson Gi'),
+('Freeland', '5', '3167493541', 'Figueredo Sans'),
+('Expector', '6', '3548890569', 'Fuquene Alberto'),
+('Terra', '7', '3334423553', 'Rudy Giovany'),
+('Hanover', '8', '3431386574', 'Tairon Estiven'),
+('Dimmu', '9', '3200469808', 'Manuela Alejo'),
+('Moth', '10', '3399406802', 'Juana Maria'),
+('Tata', '11', '3213456578', 'Yesid Alvarez'),
+('Feri', '12', '3176543421', 'Pedro Arias');
+```
